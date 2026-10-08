@@ -49,13 +49,14 @@ DevOps INGC2 : conteneurisation, Docker Compose et pipeline CI/CD.
 À COMPLÉTER Mo (image de base seule : À COMPLÉTER Mo).
 
 **Agent conteneurisé et vraies métriques.** Docker ne virtualise pas
-`/proc/meminfo` ni `/proc/loadavg` : l'agent lit les compteurs du noyau de
-l'hôte, mais ignore les limites cgroup du conteneur et remonte l'ID du
-conteneur comme hostname. Sous Docker Desktop, cet « hôte » est en plus la VM
-Linux (WSL2) et pas le PC. En vrai déploiement, il faut soit installer l'agent
-directement sur la machine (service systemd), soit le lancer avec `pid: host`,
-le `/proc` de l'hôte monté en lecture seule et le vrai hostname, comme le fait
-node-exporter de Prometheus.
+`/proc/meminfo` ni `/proc/loadavg` : sur mon Ubuntu, la RAM totale remontée
+par l'agent conteneurisé est la même que celle de `free -b` sur la machine.
+L'agent ignore donc les limites cgroup de son conteneur, et il remonte l'ID
+du conteneur comme hostname au lieu du nom de la machine (sous Docker Desktop
+ce serait même la VM Linux et pas le PC). En vrai déploiement, il faut soit
+installer l'agent directement sur la machine (service systemd), soit le
+lancer avec `pid: host`, le `/proc` de l'hôte monté en lecture seule et le
+vrai hostname, comme le fait node-exporter de Prometheus.
 
 ### Pipeline (`.github/workflows/ci-cd.yml`)
 
