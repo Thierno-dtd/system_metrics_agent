@@ -9,6 +9,12 @@ from app.collector import (
 )
 
 
+@pytest.fixture(autouse=True)
+def linux_platform():
+    with patch("app.collector.platform.system", return_value="Linux"):
+        yield
+
+
 @patch("app.collector.subprocess.run")
 def test_get_load_average_success(mock_run):
     mock_run.return_value = Mock(
@@ -25,11 +31,35 @@ def test_get_load_average_success(mock_run):
 
 
 @patch("app.collector.subprocess.run")
+def test_get_load_average_macos_format(mock_run):
+    mock_run.return_value = Mock(
+        stdout="10:00  up 3 days, 2 users, load averages: 1.50 1.20 1.00\n"
+    )
+
+    assert get_load_average()["load_15m"] == 1.00
+
+
+@patch("app.collector.subprocess.run")
 def test_get_load_average_command_error(mock_run):
     mock_run.side_effect = FileNotFoundError("uptime absent")
 
     with pytest.raises(MetricsCollectionError):
         get_load_average()
+
+
+@patch("app.collector.subprocess.run")
+def test_get_load_average_unparsable_output(mock_run):
+    mock_run.return_value = Mock(stdout="sortie inattendue")
+
+    with pytest.raises(MetricsCollectionError):
+        get_load_average()
+
+
+def test_get_load_average_windows_returns_none():
+    with patch("app.collector.platform.system", return_value="Windows"):
+        result = get_load_average()
+
+    assert result == {"load_1m": None, "load_5m": None, "load_15m": None}
 
 
 @patch("app.collector.get_load_average")

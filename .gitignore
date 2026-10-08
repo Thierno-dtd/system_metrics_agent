@@ -4,4 +4,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
-.git/
+.coverage
+coverage.xml
+.scannerwork/
